@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php include 'components/links.php' ?>
+    <title>CCSICT | Home</title>
+</head>
+
+
+<body>
+<?php
+    if ($successMessage) {
+        echo '<div class="alert alert-success" role="alert">' . $successMessage . '</div>';
+    }
+    ?>
+    <?php include 'components/nav.php' ?>
+    <!-- Carousel -->
+   <section id="carouselExampleRide" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <?php
+        $getimgNews = "SELECT * FROM `vbanner` WHERE section = 'ccsict'";
+        $runGetImg = mysqli_query($conn, $getimgNews);
+
+        $firstItem = true;
+
+        while ($rowGetImgNews = mysqli_fetch_assoc($runGetImg)) {
+            $mediaType = pathinfo($rowGetImgNews['imahe'], PATHINFO_EXTENSION);
+            $allowedImageTypes = array('jpeg', 'jpg', 'png', 'gif', 'bmp');
+            $allowedVideoTypes = array('mp4', 'avi', 'mov');
+
+            $maxWidth = '100%'; // Set your desired maximum width
+
+            // Check if it's the first item to set it as active
+            $activeClass = $firstItem ? 'active' : '';
+            $firstItem = false;
+
+            echo '<div class="carousel-item ' . $activeClass . '">';
+            echo '<div class="image-container">';
+
+            if (in_array($mediaType, $allowedImageTypes)) {
+                // Display image
+                echo '<center><img src="' . $rowGetImgNews['imahe'] . '" class="d-block carImg w-100" alt="news picture"></center>';
+            } elseif (in_array($mediaType, $allowedVideoTypes)) {
+                // Display video
+                echo '<center><video class="object-fit-cover carImg w-100" autoplay loop muted>';
+                echo '<source src="' . $rowGetImgNews['imahe'] . '" type="video/' . $mediaType . '">';
+                echo 'Your browser does not support the video tag.';
+                echo '</video></center>';
+            }
+
+            echo '</div>';
+            echo '</div>';
+        }
+
+        // Check if no images or videos were found
+        if (mysqli_num_rows($runGetImg) == 0) {
+            echo '<div class="mt-3 d-flex justify-content-center align-items-center border border-2 rounded rounded-2" style="min-height: 300px; width: 100%">No Pictures or Videos Found.</div>';
+        }
+        ?>
+    </div>
+
+   
+
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleRide" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleRide" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </section>
+
+
+    <section class="newsAndEvents mt-4 d-flex" data-aos="fade-zoom-in" data-aos-duration="1000">
+        <div class="container">
+            <div class="row">
+                <h3 class="newsText">News and Events</h3>
+                <hr>
+                <div class="col-lg-8 col-12">
+                    <?php
+                    $getNewsEvents = "SELECT * FROM `ccsict-news` ORDER BY id DESC LIMIT 3";
+                    $runGetNewsEvents = mysqli_query($conn, $getNewsEvents);
+
+                    if ($runGetNewsEvents) {
+                        while ($resNewsEvents = mysqli_fetch_assoc($runGetNewsEvents)) {
+                            $imgNews = $resNewsEvents['imahe'];
+                            ?>
+                            <div class="card mb-3 w-100">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        <?php
+                                        if ($imgNews != NULL) {
+                                            ?>
+                                            <div class="image-container">
+                                                <img src="<?= $resNewsEvents['imahe'] ?>" class="img-fluid rounded-start"
+                                                    alt="news picture">
+                                                <div class="overlay">
+                                                    <div class="text">
+                                                        <?= $resNewsEvents['imahe_desc'] ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <?php
+                                        } else {
+                                            ?>
+                                            <div class="d-flex justify-content-center align-items-center h-100">No Picture Found.
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
+
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title fw-semibold">
+                                                <?php echo $resNewsEvents['balita'] ?>
+                                            </h5>
+                                            <p class="card-text mb-auto">
+                                                <?php
+                                                $maxLength = 150;
+                                                $truncatedText = substr($resNewsEvents['laman_balita'], 0, $maxLength);
+                                                echo $truncatedText;
+                                                ?>
+                                                <form action="" method="GET">
+                                                    <input type="hidden" name="id" value="<?= $resNewsEvents['id'] ?>">
+                                                    <a href="read.php?id=<?= $resNewsEvents['id'] ?>"
+                                                        class="link-info link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
+                                                        Read More <i class="ms-3 fa-solid fa-arrow-right"></i>
+                                                    </a>
+                                                </form>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <?php
+                        }
+                    } else {
+                        echo "No Records Found";
+                    }
+                    ?>
+                    <div class="text-end">
+                        <a href="allnews.php"
+                            class="link-info link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
+                            View All<i class="fa-solid fa-arrow-right ms-3"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-12">
+                    <div class="image-container">
+                        <img src="images/ccsict.png" class="img-fluid rounded-start" alt="...">
+                        <div class="overlay">
+                            <div class="text" style="font-size: 30px">CCSICT</div>
+                        </div>
+                    </div>
+                    <span>
+                        <h4 class="fw-semibold newsText mt-4">History</h4>
+                    </span>
+                    <hr>
+                    <p style="text-align: justify text-indent">
+                        In the year 2001, ISU Cabagan (ISUC) introduced the Bachelor of Science in Information
+                        Technology (BSIT), alongside
+                        Two-Year programs in Computer Programming (CP) and Computer Secretarial (CS), in collaboration
+                        with GMAP, a private
+                        company based in Metro Manila. The BSIT program operated on a trimester basis under the
+                        administration of the College
+                        of Development Communication and Arts & Sciences (CDCAS), with GMAP supplying faculty members
+                        for computer-related ......
+                    </p>
+                    <a href="history.php"
+                        class="link-info link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
+                        Read More <i class="ms-3 fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="calendarSection mt-4" data-aos="fade-right">
+        <div class="container">
+            <?= $calendar ?>
+        </div>
+    </section>
+
+    <section class="gpsLocSection mt-4" data-aos="fade-up">
+        <div class="container">
+            <h3 class="newsText">Keep in touch with Us</h3>
+            <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.601628109504!2d121.76207067471152!3d17.430895501551234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33857909d67d704f%3A0x57488039c4b5062c!2sIsabela%20State%20University-%20CCSICT!5e0!3m2!1sen!2sph!4v1696997368982!5m2!1sen!2sph"
+                height="400" style="width:100%;" style="border:0;" allowfullscreen="" loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+    </section>
+<section class="contact-us mt-4" data-aos="fade-right">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6">
+                <h3 class="fw-semibold newsText">Contact Us</h3>
+
+                <form action="" method="post">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Your Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Your Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <!-- Add any additional contact information or map here -->
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!--Chatbot-->
+
+<style>
+
+    html, body {
+        background: #efefef;
+        height: 100%;
+        margin: 0;
+    }
+
+    #center-text {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                height: 70px;
+                padding: 0 20px;
+                background-color: #538658;
+                color: white;
+            }
+            #center-text h2 {
+                margin: 0;
+            }
+            #logo-left,
+            #logo-right {
+                height: 50px;
+                width: 50px;
+                border-radius: 50%;
+            }
+
+            #logo-right {
+                order: 3; /* Adjust the order to change its position */
+            }
+
+    #chat-circle {
+        position: fixed;
+        bottom: 50px;
+        right: 50px;
+        background: #54566d63;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        color: white;
+        padding: 15px;
+        cursor: pointer;
+        box-shadow: 0px 3px 16px 0px rgba(0, 0, 0, 0.6), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+        transition: opacity 0.5s ease, backdrop-filter 0.5s ease;
+        backdrop-filter: blur(0);
+    }
+    #chat-circle:hover {
+        opacity: 0.7;
+        backdrop-filter: blur(10px); 
+    }
+
+    .btn#my-btn {
+        background: white;
+        padding-top: 13px;
+        padding-bottom: 12px;
+        border-radius: 45px;
+        padding-right: 40px;
+        padding-left: 40px;
+        color: #5865C3;
+    }
+
+    #chat-overlay {
+        background: rgba(255, 255, 255, 0.1);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        display: none;
+    }
+
+    .chat-box {
+        display: none;
+        background: #efefef;
+        position: fixed;
+        right: 30px;
+        bottom: 50px;
+        width: 350px;
+        max-width: 85vw;
+        max-height: 100vh;
+        border-radius: 5px;
+        box-shadow: 0px 5px 35px 9px #8d8d8d;
+    }
+
+    .chat-box-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+    }
+    .chat-box-toggle b {
+        font-size: 20px;
+        color: rgb(255, 196, 196);
+    }
+
+    .chat-box-header {
+        background: #538658;
+        height: 70px;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        color: white;
+        text-align: center;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chat-box-body {
+        position: relative;
+        max-height: calc(100% - 70px); /* Adjust the height accordingly (total height - chat-box-header height) */
+        border: 1px solid #ccc;
+        overflow: hidden;
+    }
+
+    .chat-box-body:after {
+        content: "";
+        background-image: url("C:\\Users\\limis\\Documents\\ChatbotLocal\\templates\\website pics\\received_1512218956286166.jpeg");
+        opacity: 0.1;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        height: 100%;
+        position: absolute;
+        z-index: -1;
+    }
+
+    #chat-input {
+        background: #f4f7f9;
+        width: 100%;
+        position: relative;
+        height: 47px;
+        padding-top: 10px;
+        padding-right: 50px;
+        padding-bottom: 10px;
+        padding-left: 15px;
+        border: none;
+        resize: none;
+        outline: none;
+        border: 1px solid #ccc;
+        color: #0e0c0c;
+        border-top: none;
+        border-bottom-right-radius: 5px;
+        border-bottom-left-radius: 5px;
+        overflow: hidden;
+    }
+
+    .chat-input>form {
+        margin-bottom: 0;
+    }
+
+    #chat-input::-webkit-input-placeholder {
+        color: #ccc;
+    }
+
+    #chat-input::-moz-placeholder {
+        color: #ccc;
+    }
+
+    #chat-input:-ms-input-placeholder {
+        color: #ccc;
+    }
+
+    #chat-input:-moz-placeholder {
+        color: #ccc;
+    }
+
+    .chat-submit {
+        position: absolute;
+        bottom: 3px;
+        right: 10px;
+        background: transparent;
+        box-shadow: none;
+        border: none;
+        border-radius: 50%;
+        color: #282835;
+        width: 35px;
+        height: 35px;
+    }
+
+    .chat-logs {
+        padding: 15px;
+        height: 370px;
+        max-height: 100%;
+        overflow-y: scroll;
+    }
+
+    .chat-logs::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        background-color: #F5F5F5;
+    }
+
+    .chat-logs::-webkit-scrollbar {
+        width: 5px;
+        background-color: #F5F5F5;
+    }
+
+    .chat-logs::-webkit-scrollbar-thumb {
+        background-color: #434347;
+    }
+
+    @media only screen and (max-width: 500px) {
+        .chat-logs {
+            height: 40vh;
+        }
+    }
+
+    .chat-msg.user>.msg-avatar img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        float: left;
+        width: 15%;
+    }
+
+    .chat-msg.self>.msg-avatar img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        float: right;
+        width: 15%;
+    }
+
+    .cm-msg-text {
+        background: rgb(201, 198, 198);
+        padding: 10px 15px 10px 15px;
+        color: #0e0c0c;
+        max-width: 75%;
+        float: left;
+        margin-left: 10px;
+        position: relative;
+        margin-bottom: 20px;
+        border-radius: 30px;
+    }
+
+    .chat-msg {
+        clear: both;
+    }
+
+    .chat-msg.self>.cm-msg-text {
+        float: right;
+        margin-right: 10px;
+        background: hsl(126, 24%, 43%);
+        color: white;
+    }
+
+    .cm-msg-button>ul>li {
+        list-style: none;
+        float: left;
+        width: 50%;
+    }
+
+    .cm-msg-button {
+        clear: both;
+        margin-bottom: 70px;
+    }
+</style>
+
+
+<div id="body"> 
+  <div id="chat-circle" class="btn btn-raised">
+      <div id="chat-overlay"></div>
+      <img src="images\chatbot.jpeg" alt="Chatbot Image" style="width: 100%; height: 100%; border-radius: 50%;">  </div>
+
+  <div class="chat-box">
+    <div class="chat-box-header">
+    <img src="images\CHATBOT.jpg" alt="Bob's Image" style="width: 60px; height: 60px; border-radius: 50%; margin-right: 10px;">BOB 
+        <span style="font-size: 14px;">(Brainy online Buddy)</span>
+        <span class="chat-box-toggle"><b class="material-icons">X</b></span>
+  </div>
+  
+      <div class="chat-box-body">
+          <div class="chat-box-overlay"></div>
+          <div class="chat-logs" id="message-section">
+            <!-- Initial chatbot message -->
+            <div class="chat-msg bot">
+                <div class="cm-msg-text">
+                    Hello there! I'm Bob, your go-to guide for all things about enrollment, CCSICT programs, and the university's upcoming events. 
+                    Feel free to drop any questions—I'm here to help!
+                </div>
+            </div>
+        </div>
+              </div>
+      <div class="chat-input">      
+          <form>
+              <input type="text" id="chat-input" placeholder="Send a message...">
+              <button type="button" class="chat-submit" id="chat-submit"><b class="material-icons">SEND</b></button>
+          </form>      
+      </div>
+  </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(function () {
+            let offensiveWordCount = 0;
+            let isBanned = false;
+
+            $("#chat-submit").click(function (e) {
+                e.preventDefault();
+                const userMessage = $("#chat-input").val().trim();
+                if (userMessage === '') {
+                    return false;
+                }
+
+                // Display user message
+                displayMessage(userMessage, 'self');
+
+                // Simulate chatbot response (replace this with actual chatbot API call)
+                simulateChatbotResponse(userMessage);
+
+                // Optionally, you can clear the user input after receiving a response
+                $("#chat-input").val('');
+
+                // Scroll to the bottom of the chatbox to show the latest message
+                scrollChatToBottom();
+            });
+
+            function displayMessage(message, type) {
+                const mainDiv = $(".chat-logs");
+                const INDEX = mainDiv.children().length + 1;
+
+                // Create a div for the message
+                let str = `<div id='cm-msg-${INDEX}' class="chat-msg ${type}">`;
+                str += `  <div class="cm-msg-text">${message}</div>`;
+                str += '</div>';
+                mainDiv.append(str);
+
+                $(`#cm-msg-${INDEX}`).hide().fadeIn(300);
+
+                if (type === 'self') {
+                    $("#chat-input").val('');
+                }
+            }
+
+            function simulateChatbotResponse(userMessage) {
+            const apiUrl = 'http://127.0.0.1:5000/chatbot';
+
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_input: userMessage }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Check if the JSON response has the expected structure
+        if (data && data.hasOwnProperty('response')) {
+            // Display chatbot response
+            displayMessage(data.response, 'bot');
+
+            // Check for offensive warning and update count
+            if (data.response.includes('Warning: The use of offensive language is strictly prohibited. Kindly avoid using inappropriate words to maintain a respectful environment. Repeated violations may result in a temporary ban.')) {
+                offensiveWordCount++;
+
+                // Disable chat input if warning count reaches 3
+                if (offensiveWordCount >= 3) {
+                    disableChatInput();
+                }
+            }
+
+            // Scroll to the bottom of the chatbox to show the latest message
+            scrollChatToBottom();
+        } else {
+            console.error('Invalid JSON response structure:', data);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+    }
+        function disableChatInput() {
+        const chatInput = $("#chat-input");
+
+        // Change the background color to red
+        chatInput.css('background-color', '#E22030');
+        chatInput.prop('disabled', true);
+
+        // Schedule re-enabling after 30 minutes (1800000 milliseconds)
+        // 20000 for 20 secs
+        setTimeout(() => {
+            // Change the background color back to normal
+            chatInput.css('background-color', '');
+            
+            // Re-enable the chat input
+            chatInput.prop('disabled', false);
+
+            // Reset warning count
+            offensiveWordCount = 0;
+        }, 20000);
+    }
+
+
+            $("#chat-circle").click(function () {
+                $(".chat-box").fadeIn(500); // duration for fade in
+            });
+
+            $(".chat-box-toggle").click(function () {
+                $(".chat-box").fadeOut(500); // duration for fadeout
+            });
+
+            $("#chat-input").keypress(function (e) {
+                if (e.which === 13) {
+                    // 13 is the key code for Enter
+                    e.preventDefault();
+                    $("#chat-submit").click();
+                }
+            });
+        });
+</script>
+
+    <!--Chatbotend-->
+
+
+
+    <?php include 'components/footer.php' ?>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init();
+    </script>
+    <script src="js/script.js"></script>
+    <script src="js/contrast.js"></script>
+    <script src="js/speech.js"></script>
+    <script src="js/search.js"></script>
+</body>
+
+</html>
